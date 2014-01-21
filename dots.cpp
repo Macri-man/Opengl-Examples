@@ -1,5 +1,5 @@
 #include "initShaders.h"
-#include "../includes/vec.h"
+#include "vec.h"
 #include <cstdlib>
 #include <ctime>
 using namespace std;
