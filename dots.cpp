@@ -53,7 +53,7 @@ void init(){
 	
 	
 	ShaderInfo shaders[]={
-  { GL_VERTEX_SHADER , "vertexshader.glsl"} ,
+  { GL_VERTEX_SHADER , "vertexshader.glsl"},
   { GL_FRAGMENT_SHADER , "fragmentshader.glsl"},
   { GL_NONE , NULL} 
   };
