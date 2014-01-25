@@ -19,16 +19,20 @@ GLuint createProgram(const vector<GLuint> shadeList);
 typedef struct{
   GLenum type;// GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
   const char* filename;//name of file to input
+  //const char* AttribUniformList;//name of the attribute to bind to the program
 } ShaderInfo;
 
 //create the shaders for your program
 void initShaders(ShaderInfo* shaders){
   
   ShaderInfo* shade=shaders;
-  vector<GLuint> Shadelist;//initialize list of shaders
+  vector<GLuint> shadeList;//initialize list of shaders
+  //vector<char*> attribList;//list of attribute to bind to the program
+ // vector<char*> unifromList;//list of uniform names
   
   while(shade->type != GL_NONE){//loop through all the shaders in the list
-    Shadelist.push_back(createShader(shade->type,inputShader(shade->filename)));//adding shaders into the list
+    shadeList.push_back(createShader(shade->type,inputShader(shade->filename)));//adding shaders into the list
+   // parseAttribeUniform(attriblist,uniformList,shader->AttribUniformList);//makes list of attribute names
     ++shade;//incrementation
   }
   
@@ -99,6 +103,9 @@ GLuint createShader(GLenum type, const GLchar* shadeSource){
     fprintf(stderr,"\nCompile failure in %u shader: %s\n Error message:\n%s\n",type,shadeInfo,infoLog);//prints information need to debug shaders
     delete[] infoLog;//memory management
   }
+  
+  parseSource(shadersource);
+  
   return shader;//self explanatory
 }
 
@@ -129,4 +136,22 @@ GLuint createProgram(const vector<GLuint> shadeList){
   }
   return program;//self explanatory
 }
+
+
+/*
+void parseAttribeUniform(vector<char*> attribeList,vector<char*> uniformList,Glchar* List){
+	
+	for(int i=0;i<strlen(List);i++){
+		List[i];	
+	}
+	cout << endl;
+	
+	
+	char* attribname=strtok(List,attrib);
+	
+	return attribname;
+					
+}
+*/
+
 #endif
