@@ -23,8 +23,8 @@ void parseAttribUniform(vector<char*> attribList,vector<char*> uniformList,GLcha
 typedef struct{
   GLenum type;// GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
   const char* filename;//name of file to input
-  char* AttribList;//name of the attribute to bind to the program
-  char* UniformList;//name of the uniforms to bind to the program
+ // char* AttribList;//name of the attribute to bind to the program
+  //char* UniformList;//name of the uniforms to bind to the program
 } ShaderInfo;
 
 typedef struct{
@@ -38,12 +38,12 @@ void initShaders(ShaderInfo* shaders){
   ShaderInfo* shade=shaders;
   
   vector<GLuint> shadeList;//initialize list of shaders
-  vector<GLchar*> attribList;//list of attribute to bind to the program
-  vector<GLchar*> uniformList;//list of uniform names
+  //vector<GLchar*> attribList;//list of attribute to bind to the program
+  //vector<GLchar*> uniformList;//list of uniform names
   
   while(shade->type != GL_NONE){//loop through all the shaders in the list
     shadeList.push_back(createShader(shade->type,inputShader(shade->filename)));//adding shaders into the list
-    parseAttribUniform(attribList,uniformList,shade->AttribList,shade->UniformList);//makes list of attribute names
+   // parseAttribUniform(attribList,uniformList,shade->AttribList,shade->UniformList);//makes list of attribute names
     ++shade;//incrementation
   }
   
@@ -54,7 +54,7 @@ void initShaders(ShaderInfo* shaders){
   glm::mat4 trans;
 	trans = glm::rotate(trans, 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
     
-  GLint uniTrans = glGetUniformLocation(program,"veiwMatrix");
+  GLint uniTrans = glGetUniformLocation(program,"viewMatrix");
 	glUniformMatrix4fv(uniTrans,1,GL_FALSE,&trans[0][0]);
 	
 	glm::mat4 mainProjMatrix;
@@ -136,7 +136,9 @@ GLuint createProgram(const vector<GLuint> shadeList){
   
   for(GLuint i=0;i<shadeList.size();i++){glAttachShader(program,shadeList[i]);}//attaches shaders to program
   
-  cout << "program: " << program << endl;
+  //cout << "program: " << program << endl;
+  
+  //for(Gluint i=0;i<attribList.size();i++){glBindAttribLocation(program,0,attribList[i]);}
   
   glBindAttribLocation(program, 0, "position");//binds the location an attribute to a program
   glLinkProgram(program);//links program to your program //weird

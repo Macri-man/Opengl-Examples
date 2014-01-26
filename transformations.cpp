@@ -24,14 +24,25 @@ void init(){
   };
 		
   initShaders(shaders);
-  	
+  /*
+  vector<GLuint>shadelist;
+  
+  GLuint vs=createShader(GL_VERTEX_SHADER,inputShader("vertexshader.glsl"));
+  GLuint fs=createShader(GL_FRAGMENT_SHADER,inputShader("fragmentshader.glsl"));
+  
+  
+  shadelist.push_back(vs);
+  shadelist.push_back(fs);
+  GLuint program=createProgram(shadelist);
+  */
+  
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 }
 
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_TRIANGLES,0,3);
+	glDrawArrays(GL_QUADS,0,4);
 	glFlush();
 }
 
