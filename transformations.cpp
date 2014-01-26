@@ -1,10 +1,8 @@
 #include "initShaders.h"
 #include <cstdlib>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 using namespace std;
 
-Gluint count=0;
+GLuint count=0;
 
 GLuint vaoID,vboID;
 
@@ -19,26 +17,16 @@ void init(){
 	glBindBuffer(GL_ARRAY_BUFFER,vboID);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(vertexarray),vertexarray,GL_STATIC_DRAW);
 	
-	 ShaderInfo shaders[]={
-  	{ GL_VERTEX_SHADER , "vertexshader.glsl"} ,
-  	{ GL_FRAGMENT_SHADER , "fragmentshader.glsl"},
-  	{ GL_NONE , NULL} 
-  	};
-
-  	initShaders(shaders);
+	ShaderInfo shaders[]={
+  { GL_VERTEX_SHADER , "vertexshader.glsl"},
+  { GL_FRAGMENT_SHADER , "fragmentshader.glsl"}, 
+  { GL_NONE , NULL} 
+  };
+		
+  initShaders(shaders);
   	
-  	glEnableVertexAttribArray(0);
-  	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
-  	
-  	glm::mat4 temp;
-    temp=glm::rotate(glm::mat4(),count,glm::vec3(0,0,1));
-    
-    int tempLoc = glGetUniformLocation(program, "viewMatrix");
-    glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &temp[0][0]);
-  	
-  	glBindVertexArray(0);
-    glDeleteVertexArrays(1,&vao);
-    glDeleteBuffers(2,vbo);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 }
 
 void display(){
@@ -47,19 +35,19 @@ void display(){
 	glFlush();
 }
 
-void keypress(unsigned char key,int w,int y){
+void keypress(unsigned char key,int x,int y){
 		switch(key){
-			case key=='w': case key=='W':
+			case 'w': case 'W':
 			count++;
 			break;
-			case key=='s': case key=='S':
+			case 's': case 'S':
+			count--;
+			break;
+			case 'a': case 'A':
 			count++;
 			break;
-			case key=='a': case key=='A':
-			count++;
-			break;
-			case key=='d': case key=='D':
-			count++;
+			case 'd': case 'D':
+			count--;
 			break;
 		}
 }
@@ -84,18 +72,19 @@ int main(int argc, char **argv){
   glutInitContextVersion(4, 3);//specifies the version of opengl
   glutInitContextProfile(GLUT_CORE_PROFILE|GLUT_COMPATIBILITY_PROFILE);//specifies what profile your using
 
-
   //retruns what version of opengl and glsl your computer can use
   const GLubyte* version=glGetString(GL_SHADING_LANGUAGE_VERSION);
   fprintf(stderr,"Opengl glsl version %s\n", version);
 
   version=glGetString(GL_VERSION);
   fprintf(stderr,"Opengl version %s\n", version);
-
-  glutDisplayFunc(drawscene);//displays callback draws the shapes
+  
+	init();
+	
+  glutDisplayFunc(display);//displays callback draws the shapes
   glutMouseFunc(mousepress);//control callback specifies the mouse controls
+  glutKeyboardFunc(keypress);//control callback specifies the mouse controls
   glutMainLoop();//sets opengl state in a neverending loop
   return 0;
-}
 }
 	

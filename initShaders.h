@@ -5,6 +5,9 @@
 #include "GL/freeglut.h"
 #include "GL/gl.h"
 #include "GL/glu.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 #include <cstdio>
@@ -15,30 +18,50 @@ using namespace std;
 GLuint createShader(GLenum type, const GLchar* shadeSource);
 const GLchar* inputShader(const char* filename);
 GLuint createProgram(const vector<GLuint> shadeList);
+void parseAttribUniform(vector<char*> attribList,vector<char*> uniformList,GLchar* AttribList,GLchar* UniformList);
 
 typedef struct{
   GLenum type;// GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
   const char* filename;//name of file to input
-  //const char* AttribUniformList;//name of the attribute to bind to the program
+  char* AttribList;//name of the attribute to bind to the program
+  char* UniformList;//name of the uniforms to bind to the program
 } ShaderInfo;
+
+typedef struct{
+  GLuint name;// the program
+} ProgramInfo;
+
 
 //create the shaders for your program
 void initShaders(ShaderInfo* shaders){
   
   ShaderInfo* shade=shaders;
+  
   vector<GLuint> shadeList;//initialize list of shaders
-  //vector<char*> attribList;//list of attribute to bind to the program
- // vector<char*> unifromList;//list of uniform names
+  vector<GLchar*> attribList;//list of attribute to bind to the program
+  vector<GLchar*> uniformList;//list of uniform names
   
   while(shade->type != GL_NONE){//loop through all the shaders in the list
     shadeList.push_back(createShader(shade->type,inputShader(shade->filename)));//adding shaders into the list
-   // parseAttribeUniform(attriblist,uniformList,shader->AttribUniformList);//makes list of attribute names
+    parseAttribUniform(attribList,uniformList,shade->AttribList,shade->UniformList);//makes list of attribute names
     ++shade;//incrementation
   }
   
-  GLuint program=createProgram(Shadelist);//creates the program linking to all the shaders
+  GLuint program=createProgram(shadeList);//creates the program linking to all the shaders
   
   glUseProgram(program);//installs a program object as part of current rendering state
+  
+  glm::mat4 trans;
+	trans = glm::rotate(trans, 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+    
+  GLint uniTrans = glGetUniformLocation(program,"veiwMatrix");
+	glUniformMatrix4fv(uniTrans,1,GL_FALSE,&trans[0][0]);
+	
+	glm::mat4 mainProjMatrix;
+  mainProjMatrix = glm::ortho(-45.0,45.0,-45.0,45.0,-5.0,5000.0);
+  GLint tempLoc = glGetUniformLocation(program, "Matrix");
+  glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &mainProjMatrix[0][0]);
+  
 }
 
 //this funtion loads the shader from the vertex, fragments shaders 
@@ -103,9 +126,6 @@ GLuint createShader(GLenum type, const GLchar* shadeSource){
     fprintf(stderr,"\nCompile failure in %u shader: %s\n Error message:\n%s\n",type,shadeInfo,infoLog);//prints information need to debug shaders
     delete[] infoLog;//memory management
   }
-  
-  parseSource(shadersource);
-  
   return shader;//self explanatory
 }
 
@@ -115,6 +135,8 @@ GLuint createProgram(const vector<GLuint> shadeList){
   GLuint program = glCreateProgram();//creates your program
   
   for(GLuint i=0;i<shadeList.size();i++){glAttachShader(program,shadeList[i]);}//attaches shaders to program
+  
+  cout << "program: " << program << endl;
   
   glBindAttribLocation(program, 0, "position");//binds the location an attribute to a program
   glLinkProgram(program);//links program to your program //weird
@@ -138,20 +160,38 @@ GLuint createProgram(const vector<GLuint> shadeList){
 }
 
 
-/*
-void parseAttribeUniform(vector<char*> attribeList,vector<char*> uniformList,Glchar* List){
+
+void parseAttribUniform(vector<GLchar*> attribList,vector<GLchar*> uniformList,GLchar* AttribList,GLchar* UniformList){
 	
-	for(int i=0;i<strlen(List);i++){
-		List[i];	
+	for(int i=0;i<strlen(AttribList);i++){
+		AttribList[i];	
 	}
 	cout << endl;
 	
+	for(int i=0;i<strlen(UniformList);i++){
+		UniformList[i];	
+	}
+	cout << endl;
 	
-	char* attribname=strtok(List,attrib);
+	const char parse[2] = " ";
+  char *token;
+  
+  token = strtok(AttribList,parse);
+  
+  while( token != NULL ){
+  	printf("%s\n",token);
+  	attribList.push_back(token);
+  	token=strtok(NULL,parse);
+  }
+  
+  token=strtok(UniformList,parse);
 	
-	return attribname;
-					
+	while( token != NULL ){
+  	printf("%s\n",token);
+  	uniformList.push_back(token);
+  	token=strtok(NULL,parse);
+  }			
 }
-*/
+
 
 #endif
