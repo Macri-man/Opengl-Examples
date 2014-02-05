@@ -20,16 +20,13 @@ const GLchar* inputShader(const char* filename);
 GLuint createProgram(const vector<GLuint> shadeList);
 void parseAttribUniform(vector<char*> attribList,vector<char*> uniformList,GLchar* AttribList,GLchar* UniformList);
 
+GLfloat pit=0;yaw=0;
+glm::vec3 userTran;
+
 typedef struct{
   GLenum type;// GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
   const char* filename;//name of file to input
- // char* AttribList;//name of the attribute to bind to the program
-  //char* UniformList;//name of the uniforms to bind to the program
 } ShaderInfo;
-
-typedef struct{
-  GLuint name;// the program
-} ProgramInfo;
 
 
 //create the shaders for your program
@@ -48,20 +45,35 @@ void initShaders(ShaderInfo* shaders){
   }
   
   GLuint program=createProgram(shadeList);//creates the program linking to all the shaders
-  
-  glUseProgram(program);//installs a program object as part of current rendering state
-  
-  glm::mat4 trans;
-	trans = glm::rotate(trans, 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+ 	
+ 	transforms(program);
+   
+}
+
+
+void transforms(Gluint program){
+
+	glUseProgram(program);//installs a program object as part of current rendering state
+	
+	glm::mat4 trans;
+
+  temp=glm::rotate(trans,pit,glm::vec3(1,0,0));
+  temp=glm::rotate(trans,yaw,glm::vec3(0,1,0));
+  trans=glm::translate(trans,userTran);
     
-  GLint uniTrans = glGetUniformLocation(program,"viewMatrix");
+  GLint tempLoc = glGetUniformLocation(program,"viewMatrix");
 	glUniformMatrix4fv(uniTrans,1,GL_FALSE,&trans[0][0]);
 	
 	glm::mat4 mainProjMatrix;
-  mainProjMatrix = glm::ortho(-45.0,45.0,-45.0,45.0,-5.0,5000.0);
-  GLint tempLoc = glGetUniformLocation(program, "Matrix");
+  mainProjMatrix = glm::perspective(60.0f,1.0f,0.5f,500.0f);
+  
+  tempLoc = glGetUniformLocation(program, "Matrix");
   glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &mainProjMatrix[0][0]);
   
+  glm::mat4 temp;
+  tempLoc = glGetUniformLocation(program, "modelMatrix");
+  glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &temp[0][0]);
+    
 }
 
 //this funtion loads the shader from the vertex, fragments shaders 
@@ -135,12 +147,9 @@ GLuint createProgram(const vector<GLuint> shadeList){
   GLuint program = glCreateProgram();//creates your program
   
   for(GLuint i=0;i<shadeList.size();i++){glAttachShader(program,shadeList[i]);}//attaches shaders to program
-  
-  //cout << "program: " << program << endl;
-  
-  //for(Gluint i=0;i<attribList.size();i++){glBindAttribLocation(program,0,attribList[i]);}
-  
-  glBindAttribLocation(program, 0, "position");//binds the location an attribute to a program
+
+  glBindAttribLocation(program, 0, "in_position");//binds the location an attribute to a program
+  glBindAttribLocation(program, 1, "in_color");//binds the location an attribute to a program
   glLinkProgram(program);//links program to your program //weird
   
   GLint linkStatus;//status for linking variable
@@ -160,40 +169,5 @@ GLuint createProgram(const vector<GLuint> shadeList){
   }
   return program;//self explanatory
 }
-
-
-
-void parseAttribUniform(vector<GLchar*> attribList,vector<GLchar*> uniformList,GLchar* AttribList,GLchar* UniformList){
-	
-	for(int i=0;i<strlen(AttribList);i++){
-		AttribList[i];	
-	}
-	cout << endl;
-	
-	for(int i=0;i<strlen(UniformList);i++){
-		UniformList[i];	
-	}
-	cout << endl;
-	
-	const char parse[2] = " ";
-  char *token;
-  
-  token = strtok(AttribList,parse);
-  
-  while( token != NULL ){
-  	printf("%s\n",token);
-  	attribList.push_back(token);
-  	token=strtok(NULL,parse);
-  }
-  
-  token=strtok(UniformList,parse);
-	
-	while( token != NULL ){
-  	printf("%s\n",token);
-  	uniformList.push_back(token);
-  	token=strtok(NULL,parse);
-  }			
-}
-
 
 #endif
