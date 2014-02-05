@@ -2,8 +2,6 @@
 #include <cstdlib>
 using namespace std;
 
-GLuint count=0;
-
 GLuint vaoID,vboID;
 
 Glfloat size=20;
@@ -25,12 +23,12 @@ GLfloat colorarray[]={1.0f,1.0f,1.0f,1.0f,
 											.5f,1.0f,1.0f,1.0f,
 											1.0f,.5f,1.0f,1.0f,
 											1.0f,1.0f,.5f,1.0f,
-											}
+											};
 											
- GLfloat elems[24]={0,1,2,3,7,4,5,6,//z
-    								7,3,0,4,5,6,2,1,//y
-    								0,1,5,4,7,3,2,6//x
-                    };
+ GLfloat elems[]={0,1,2,3,7,4,5,6,
+    							7,3,0,4,5,6,2,1,
+    							0,1,5,4,7,3,2,6
+                  };
 
 void init(){
 	
@@ -48,17 +46,6 @@ void init(){
   };
 		
   initShaders(shaders);
-  /*
-  vector<GLuint>shadelist;
-  
-  GLuint vs=createShader(GL_VERTEX_SHADER,inputShader("vertexshader.glsl"));
-  GLuint fs=createShader(GL_FRAGMENT_SHADER,inputShader("fragmentshader.glsl"));
-  
-  
-  shadelist.push_back(vs);
-  shadelist.push_back(fs);
-  GLuint program=createProgram(shadelist);
-  */
   
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
@@ -66,23 +53,35 @@ void init(){
 
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_QUADS,0,4);
+	glDrawElements(GL_POLYGON,24,GL_FLOAT,NULL);
 	glFlush();
 }
 
 void keypress(unsigned char key,int x,int y){
 		switch(key){
 			case 'w': case 'W':
-			count++;
+			pit+=2;
 			break;
 			case 's': case 'S':
-			count--;
+			pit-=2;
 			break;
 			case 'a': case 'A':
-			count++;
+			yaw++=2;
 			break;
 			case 'd': case 'D':
-			count--;
+			yaw--=2;
+			break;
+			case 'i': case 'I':
+			cubeTran.x+=2;
+			break;
+			case 'k': case 'K':
+			cubeTran.x-=2;
+			break;
+			case 'j': case 'J':
+			cubeTran.y+=2;
+			break;
+			case 'l': case 'L':
+			cubeTran.y-=2;
 			break;
 		}
 }
@@ -94,6 +93,9 @@ void mousepress(int button, int state, int x, int y){
 
 
 int main(int argc, char **argv){
+
+	glViewport(0, 0, 600, 600);
+	
 	glutInit(&argc, argv);
   glutCreateWindow("transformations");//creates the window with the specified name
   
