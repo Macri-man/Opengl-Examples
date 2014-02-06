@@ -2,9 +2,15 @@
 #include <cstdlib>
 using namespace std;
 
-GLuint vaoID,vboID;
+void rotate(GLuint locate);
 
-GLfloat size=1;
+GLuint vaoID,vboID[2];
+GLuint program;
+
+GLfloat pit,yaw,scalar=1;
+glm::vec3 cubeTran;
+
+GLfloat size=10;
 
 GLfloat vertexarray[]={size,size,-size,
 											 size,-size,-size,
@@ -26,7 +32,7 @@ GLfloat colorarray[]={1.0f,1.0f,1.0f,1.0f,
 											1.0f,1.0f,0.5f,1.0f
 											};
 											
- GLfloat elems[]={0,1,2,3,7,4,5,6,
+ GLubyte elems[]={0,1,2,3,7,4,5,6,
     							7,3,0,4,5,6,2,1,
     							0,1,5,4,7,3,2,6
                   };
@@ -38,60 +44,91 @@ void init(){
 	glGenVertexArrays(1,&vaoID);
 	glBindVertexArray(vaoID);
 	
-	glGenBuffers(1,&vboID);
-	glBindBuffer(GL_ARRAY_BUFFER,vboID);
+	glGenBuffers(2, vboID);
+	glBindBuffer(GL_ARRAY_BUFFER,vboID[0]);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(vertexarray),vertexarray,GL_STATIC_DRAW);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 	
+	glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
+  glBufferData(GL_ARRAY_BUFFER,sizeof(colorarray),colorarray,GL_STATIC_DRAW);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 	ShaderInfo shaders[]={
   { GL_VERTEX_SHADER , "vertexshader.glsl"},
   { GL_FRAGMENT_SHADER , "fragmentshader.glsl"}, 
   { GL_NONE , NULL} 
   };
 		
-  initShaders(shaders);
+  program=initShaders(shaders);
   
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
+  glEnableVertexAttribArray(1);
+  
 }
 
-void display(){
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawElements(GL_POLYGON,24,GL_FLOAT,NULL);
+
+void display(SDL_Window* screen){
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	
+	glm::mat4 trans;
+	
+	trans=glm::translate(trans,cubeTran);
+  trans=glm::rotate(trans,pit,glm::vec3(1,0,0));
+  trans=glm::rotate(trans,yaw,glm::vec3(0,1,0));
+  trans=glm::scale(trans,glm::vec3(scalar));
+    
+  GLint tempLoc = glGetUniformLocation(program,"modelMatrix");
+	glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
+	
+	glDrawElements(GL_POLYGON,24,GL_UNSIGNED_BYTE,elems);
 	glFlush();
+	SDL_GL_SwapWindow(screen);
 }
 
-void keypress(unsigned char key,int x,int y){
-		switch(key){
-			case 'w': case 'W':
-			pit+=2;
-			break;
-			case 's': case 'S':
-			pit-=2;
-			break;
-			case 'a': case 'A':
-			yaw+=2;
-			break;
-			case 'd': case 'D':
-			yaw-=2;
-			break;
-			case 'i': case 'I':
-			cubeTran.x+=2;
-			break;
-			case 'k': case 'K':
-			cubeTran.x-=2;
-			break;
-			case 'j': case 'J':
-			cubeTran.y+=2;
-			break;
-			case 'l': case 'L':
-			cubeTran.y-=2;
-			break;
+void input(SDL_Window* screen){
+
+SDL_Event event;
+
+	while (SDL_PollEvent(&event)){
+		switch (event.type){
+			case SDL_QUIT:exit(0);break;
+			case SDL_KEYDOWN:
+				switch(event.key.keysym.sym){
+					case SDLK_ESCAPE:exit(0);
+					case SDLK_w:cubeTran.y+=2;
+					cout << "w" << endl;break;
+					case SDLK_s:cubeTran.y-=2;
+					cout << "s" << endl;break;
+					case SDLK_a:cubeTran.x-=2;
+					cout << "a" << endl;break;
+					case SDLK_d:cubeTran.x+=2;
+					cout << "d" << endl;break;
+					//case SDLK_e:cubeTran.z+=2;
+					//cout << "e" << endl;break;
+					//case SDLK_q:cubeTran.z-=2;
+					//cout << "q" << endl;break;
+					case SDLK_e:scalar+=.1f;
+					cout << "e" << endl;break;
+					case SDLK_q:scalar-=.1f;
+					cout << "q" << endl;break;
+					case SDLK_i:pit+=2;
+					cout << "i" << endl;break;
+					case SDLK_k:pit-=2;
+					cout << "k" << endl;break;
+					case SDLK_j:yaw+=2;
+					cout << "j" << endl;break;
+					case SDLK_l:yaw-=2;
+					cout << "l" << endl;break;
+				}
+		/*case SDL_MOUSEMOTION:
+				yaw+=((event.motion.x)-300)/10.0;
+				pit+=((event.motion.y)-300)/10.0;
+				SDL_WarpMouseInWindow(screen,300,300);
+				
+			}
+			*/
 		}
-}
-
-void mousepress(int button, int state, int x, int y){
-  if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN)
-    exit(0);
+	}
 }
 
 
@@ -105,18 +142,15 @@ int main(int argc, char **argv){
     SDL_Quit();
     exit(1);//die on error
 	}
-	//get the version of opengl
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
-	
+
 	//create window
 	window = SDL_CreateWindow(
-		"Simple", //Window title
+		"Example", //Window title
 		SDL_WINDOWPOS_UNDEFINED, //initial x position
 		SDL_WINDOWPOS_UNDEFINED, //initial y position
 		500,							//width, in pixels
 		500,							//height, in pixels
-		SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN		//flags to be had
+		SDL_WINDOW_OPENGL	//flags to be had
 	);
 	
 	//check window creation
@@ -124,53 +158,27 @@ int main(int argc, char **argv){
 		fprintf(stderr,"Unable to create window: %s\n",SDL_GetError());
 	}
 	
+
 	//creates opengl context associated with the window
 	SDL_GLContext glcontext=SDL_GL_CreateContext(window);
 	
-	
-	SDL_Event event;
-	while(SDL_PollEvent(&event)){
-		switch(event.type){
-			case SDL_BUTTON_RIGHT:exit(1);
-		}
-	}
-	
-	
-	SDL_GL_DeleteContext(glcontext);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
- 
-  return 0;
-}
-	
-	/*
-	glutInit(&argc, argv);
-  glutCreateWindow("transformations");//creates the window with the specified name
-  
-  //initializes glew
+	//initializes glew
   glewExperimental=GL_TRUE;
   if(glewInit()){
     fprintf(stderr, "Unable to initalize GLEW");
     exit(EXIT_FAILURE);
   }
   
-  glutInitContextVersion(4, 3);//specifies the version of opengl
-  glutInitContextProfile(GLUT_CORE_PROFILE|GLUT_COMPATIBILITY_PROFILE);//specifies what profile your using
-
-  //retruns what version of opengl and glsl your computer can use
-  const GLubyte* version=glGetString(GL_SHADING_LANGUAGE_VERSION);
-  fprintf(stderr,"Opengl glsl version %s\n", version);
-
-  version=glGetString(GL_VERSION);
-  fprintf(stderr,"Opengl version %s\n", version);
-  
 	init();
 	
-  glutDisplayFunc(display);//displays callback draws the shapes
-  glutMouseFunc(mousepress);//control callback specifies the mouse controls
-  glutKeyboardFunc(keypress);//control callback specifies the mouse controls
-  glutMainLoop();//sets opengl state in a neverending loop
+	while(true){
+	  input(window);
+		display(window);
+	}
+
+	SDL_GL_DeleteContext(glcontext);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+ 
   return 0;
-  */
 }
-	

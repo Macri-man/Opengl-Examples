@@ -1,10 +1,11 @@
 #ifndef INITSHADERS_H_
 #define INITSHADERS_H_
 //functions for loading in shaders
-#include "GL/glew.h"
-#include "GL/freeglut.h"
-#include "GL/gl.h"
-#include "GL/glu.h"
+#include <SDL2/SDL.h>
+#include <GL/glew.h>
+//#include "GL/freeglut.h"
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,8 +21,6 @@ const GLchar* inputShader(const char* filename);
 GLuint createProgram(const vector<GLuint> shadeList);
 void transform(GLuint program);
 
-GLfloat pit,yaw;
-glm::vec3 cubeTran;
 
 typedef struct{
   GLenum type;// GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
@@ -30,7 +29,7 @@ typedef struct{
 
 
 //create the shaders for your program
-void initShaders(ShaderInfo* shaders){
+GLuint initShaders(ShaderInfo* shaders){
   
   ShaderInfo* shade=shaders;
   
@@ -43,35 +42,25 @@ void initShaders(ShaderInfo* shaders){
   }
   
   GLuint program=createProgram(shadeList);//creates the program linking to all the shaders
- 	
- 	transform(program);
-   
-}
-
-
-void transform(GLuint program){
-
-	glUseProgram(program);//installs a program object as part of current rendering state
-	
-	glm::mat4 trans;
-
-  trans=glm::rotate(trans,pit,glm::vec3(1,0,0));
-  trans=glm::rotate(trans,yaw,glm::vec3(0,1,0));
-  trans=glm::translate(trans,cubeTran);
-    
-  GLint tempLoc = glGetUniformLocation(program,"viewMatrix");
-	glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
-	
-	glm::mat4 mainProjMatrix;
-  mainProjMatrix = glm::perspective(60.0f,1.0f,0.5f,500.0f);
   
+ 	glUseProgram(program);
+  
+  glm::mat4 view;
+  view = glm::lookAt(
+ 				glm::vec3(0.0f, 0.0f, 50.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+  GLint tempLoc = glGetUniformLocation(program, "viewMatrix");
+  glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &view[0][0]);
+  
+  glm::mat4 mainProjMatrix;
+  mainProjMatrix = glm::perspective(57.0,1.0,.1,500.0);
   tempLoc = glGetUniformLocation(program, "Matrix");
   glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &mainProjMatrix[0][0]);
   
-  glm::mat4 temp;
-  tempLoc = glGetUniformLocation(program, "modelMatrix");
-  glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &temp[0][0]);
-    
+  return program;
+   
 }
 
 //this funtion loads the shader from the vertex, fragments shaders 
