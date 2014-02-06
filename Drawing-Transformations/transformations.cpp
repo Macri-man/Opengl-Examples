@@ -72,12 +72,12 @@ void display(SDL_Window* screen){
 	
 	glm::mat4 trans;
 	
-	trans=glm::translate(trans,cubeTran);
-  trans=glm::rotate(trans,pit,glm::vec3(1,0,0));
-  trans=glm::rotate(trans,yaw,glm::vec3(0,1,0));
-  trans=glm::scale(trans,glm::vec3(scalar));
+	trans=glm::translate(trans,cubeTran);//translate the cube
+  trans=glm::rotate(trans,pit,glm::vec3(1,0,0));//rotate the cube around the x axis
+  trans=glm::rotate(trans,yaw,glm::vec3(0,1,0));//rotate the cube arround the y axis
+  trans=glm::scale(trans,glm::vec3(scalar));//scaling the cube
     
-  GLint tempLoc = glGetUniformLocation(program,"modelMatrix");
+  GLint tempLoc = glGetUniformLocation(program,"modelMatrix");//Matrix that handle the transformations
 	glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
 	
 	glDrawElements(GL_POLYGON,24,GL_UNSIGNED_BYTE,elems);
@@ -89,36 +89,22 @@ void input(SDL_Window* screen){
 
 SDL_Event event;
 
-	while (SDL_PollEvent(&event)){
+	while (SDL_PollEvent(&event)){//Handling the keyboard
 		switch (event.type){
 			case SDL_QUIT:exit(0);break;
 			case SDL_KEYDOWN:
 				switch(event.key.keysym.sym){
 					case SDLK_ESCAPE:exit(0);
-					case SDLK_w:cubeTran.y+=2;
-					cout << "w" << endl;break;
-					case SDLK_s:cubeTran.y-=2;
-					cout << "s" << endl;break;
-					case SDLK_a:cubeTran.x-=2;
-					cout << "a" << endl;break;
-					case SDLK_d:cubeTran.x+=2;
-					cout << "d" << endl;break;
-					//case SDLK_e:cubeTran.z+=2;
-					//cout << "e" << endl;break;
-					//case SDLK_q:cubeTran.z-=2;
-					//cout << "q" << endl;break;
-					case SDLK_e:scalar+=.1f;
-					cout << "e" << endl;break;
-					case SDLK_q:scalar-=.1f;
-					cout << "q" << endl;break;
-					case SDLK_i:pit+=2;
-					cout << "i" << endl;break;
-					case SDLK_k:pit-=2;
-					cout << "k" << endl;break;
-					case SDLK_j:yaw+=2;
-					cout << "j" << endl;break;
-					case SDLK_l:yaw-=2;
-					cout << "l" << endl;break;
+					case SDLK_w:cubeTran.y+=2;break;
+					case SDLK_s:cubeTran.y-=2;break;
+					case SDLK_a:cubeTran.x-=2;break;
+					case SDLK_d:cubeTran.x+=2;break;
+					case SDLK_e:scalar+=.1f;break;
+					case SDLK_q:scalar-=.1f;break;
+					case SDLK_i:pit+=2;break;
+					case SDLK_k:pit-=2;break;
+					case SDLK_j:yaw+=2;break;
+					case SDLK_l:yaw-=2;break;
 				}
 		/*case SDL_MOUSEMOTION:
 				yaw+=((event.motion.x)-300)/10.0;
@@ -172,8 +158,8 @@ int main(int argc, char **argv){
 	init();
 	
 	while(true){
-	  input(window);
-		display(window);
+	  input(window);//keyboard controls
+		display(window);//displaying
 	}
 
 	SDL_GL_DeleteContext(glcontext);

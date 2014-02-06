@@ -46,16 +46,16 @@ GLuint initShaders(ShaderInfo* shaders){
  	glUseProgram(program);
   
   glm::mat4 view;
-  view = glm::lookAt(
- 				glm::vec3(0.0f, 0.0f, 50.0f),
+  view = glm::lookAt(//position and direction of camera
+ 	  		glm::vec3(0.0f, 0.0f, 50.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-  GLint tempLoc = glGetUniformLocation(program, "viewMatrix");
+  GLint tempLoc = glGetUniformLocation(program, "viewMatrix");//Matrix that handles the camera movement
   glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &view[0][0]);
   
   glm::mat4 mainProjMatrix;
-  mainProjMatrix = glm::perspective(57.0,1.0,.1,500.0);
+  mainProjMatrix = glm::perspective(57.0,1.0,.1,500.0);//Matrix that handle the orthographic or perspective viewing
   tempLoc = glGetUniformLocation(program, "Matrix");
   glUniformMatrix4fv(tempLoc, 1, GL_FALSE, &mainProjMatrix[0][0]);
   
