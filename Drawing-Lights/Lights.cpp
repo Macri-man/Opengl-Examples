@@ -13,7 +13,7 @@ glm::vec3 cubeTran;
 GLfloat size=10;
 
 GLfloat vertexarray[]={size,size,-size,
-		                   size,-size,-size,
+		       size,-size,-size,
                        -size,-size,-size,
                        -size,size,-size,
                        size,size,size,
@@ -24,36 +24,36 @@ GLfloat vertexarray[]={size,size,-size,
 
 GLfloat colorarray[]={1.0f,1.0f,1.0f,1.0f,
 	              0.5f,1.0f,1.0f,1.0f,
-			                1.0f,0.5f,1.0f,1.0f,
-		                	1.0f,1.0f,0.5f,1.0f,
-			                1.0f,1.0f,1.0f,1.0f,
-		                	0.5f,1.0f,1.0f,1.0f,
-			                1.0f,0.5f,1.0f,1.0f,
-		                	1.0f,1.0f,0.5f,1.0f
+		      1.0f,0.5f,1.0f,1.0f,
+		      1.0f,1.0f,0.5f,1.0f,
+		      1.0f,1.0f,1.0f,1.0f,
+	              0.5f,1.0f,1.0f,1.0f,
+		      1.0f,0.5f,1.0f,1.0f,
+		      1.0f,1.0f,0.5f,1.0f
 			               };
 											
  GLubyte elems[]={0,1,2,3,7,4,5,6,
-    	           	7,3,0,4,5,6,2,1,
-    		          0,1,5,4,7,3,2,6
+    	          7,3,0,4,5,6,2,1,
+    		  0,1,5,4,7,3,2,6
                   };
 
 void init(){
-	 glEnable(GL_DEPTH_TEST);
-	 glViewport(0, 0, 600, 600);
-	
-	glGenVertexArrays(1,&vaoID);
-	glBindVertexArray(vaoID);
-	
-	glGenBuffers(2, vboID);
-	glBindBuffer(GL_ARRAY_BUFFER,vboID[0]);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(vertexarray),vertexarray,GL_STATIC_DRAW);
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
+  glEnable(GL_DEPTH_TEST);
+  glViewport(0, 0, 600, 600);
+  
+  glGenVertexArrays(1,&vaoID);
+  glBindVertexArray(vaoID);
+  
+  glGenBuffers(2, vboID);
+  glBindBuffer(GL_ARRAY_BUFFER,vboID[0]);
+  glBufferData(GL_ARRAY_BUFFER,sizeof(vertexarray),vertexarray,GL_STATIC_DRAW);
+  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
   glBufferData(GL_ARRAY_BUFFER,sizeof(colorarray),colorarray,GL_STATIC_DRAW);
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	ShaderInfo shaders[]={
+  
+  ShaderInfo shaders[]={
   { GL_VERTEX_SHADER , "vertexshader.glsl"},
   { GL_FRAGMENT_SHADER , "fragmentshader.glsl"}, 
   { GL_NONE , NULL} 
