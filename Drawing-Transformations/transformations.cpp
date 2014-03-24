@@ -84,90 +84,60 @@ void display(SDL_Window* screen){
   GLint tempLoc = glGetUniformLocation(program,"modelMatrix");
   glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
   
-  glDrawElements(GL_POLYGON,24,GL_UNSIGNED_BYTE,elems);
+  glDrawElements(GL_POLYGON,24,GL_UNSIGNED_BYTE,NULL);
   SDL_GL_SwapWindow(screen);
 }
 
 void input(SDL_Window* screen){
 
 SDL_Event event;
-
-	while (SDL_PollEvent(&event)){//Handling the keyboard
-		switch (event.type){
-			case SDL_QUIT:exit(0);break;
-			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym){
-					case SDLK_ESCAPE:exit(0);
-					case SDLK_w:cubeTran.y+=2;break;
-					case SDLK_s:cubeTran.y-=2;break;
-					case SDLK_a:cubeTran.x-=2;break;
-					case SDLK_d:cubeTran.x+=2;break;
-					case SDLK_e:scalar+=.1f;break;
-					case SDLK_q:scalar-=.1f;break;
-					case SDLK_i:pit+=2;break;
-					case SDLK_k:pit-=2;break;
-					case SDLK_j:yaw+=2;break;
-					case SDLK_l:yaw-=2;break;
-				}
-		/*case SDL_MOUSEMOTION:
-				yaw+=((event.motion.x)-300)/10.0;
-				pit+=((event.motion.y)-300)/10.0;
-				SDL_WarpMouseInWindow(screen,300,300);
-				
-			}
-			*/
-		}
-	}
+while (SDL_PollEvent(&event)){
+  switch (event.type){
+    case SDL_QUIT:exit(0);break;
+    case SDL_KEYDOWN:
+    switch(event.key.keysym.sym){
+      case SDLK_ESCAPE:exit(0);
+      case SDLK_w:cubeTran.y+=2;break;
+      case SDLK_s:cubeTran.y-=2;break;
+      case SDLK_a:cubeTran.x-=2;break;
+      case SDLK_d:cubeTran.x+=2;break;
+      case SDLK_e:scalar+=.1f;break;
+      case SDLK_q:scalar-=.1f;break;
+      case SDLK_i:pit+=2;break;
+      case SDLK_k:pit-=2;break;
+      case SDLK_j:yaw+=2;break;
+      case SDLK_l:yaw-=2;break;
+      }
+    }
+  }
 }
 
 
 int main(int argc, char **argv){
-	
-	//SDL window and context management
-	SDL_Window *window;
-	
-	if(SDL_Init(SDL_INIT_VIDEO)<0){//initilizes the SDL video subsystem
-		fprintf(stderr,"Unable to create window: %s\n", SDL_GetError());
+  SDL_Window *window;
+  if(SDL_Init(SDL_INIT_VIDEO)<0){
+    fprintf(stderr,"Unable to create window: %s\n", SDL_GetError());
     SDL_Quit();
-    exit(1);//die on error
-	}
-
-	//create window
-	window = SDL_CreateWindow(
-		"Example", //Window title
-		SDL_WINDOWPOS_UNDEFINED, //initial x position
-		SDL_WINDOWPOS_UNDEFINED, //initial y position
-		500,							//width, in pixels
-		500,							//height, in pixels
-		SDL_WINDOW_OPENGL	//flags to be had
-	);
+    exit(1);
+    }
+    
+  window = SDL_CreateWindow("Transformations",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,500,500,SDL_WINDOW_OPENGL);
+  if(window==NULL){fprintf(stderr,"Unable to create window: %s\n",SDL_GetError());}
 	
-	//check window creation
-	if(window==NULL){
-		fprintf(stderr,"Unable to create window: %s\n",SDL_GetError());
-	}
-	
-
-	//creates opengl context associated with the window
-	SDL_GLContext glcontext=SDL_GL_CreateContext(window);
-	
-	//initializes glew
+  SDL_GLContext glcontext=SDL_GL_CreateContext(window);
   glewExperimental=GL_TRUE;
   if(glewInit()){
     fprintf(stderr, "Unable to initalize GLEW");
     exit(EXIT_FAILURE);
   }
-  
-	init();
-	
-	while(true){
-	  input(window);//keyboard controls
-		display(window);//displaying
-	}
+  init();
+  while(true){
+    input(window);
+    display(window);
+  }
 
-	SDL_GL_DeleteContext(glcontext);
+  SDL_GL_DeleteContext(glcontext);
   SDL_DestroyWindow(window);
   SDL_Quit();
- 
   return 0;
 }
