@@ -23,7 +23,7 @@ GLfloat vertexarray[]={size,size,-size,
                        };
 
 GLfloat colorarray[]={1.0f,1.0f,1.0f,1.0f,
-	                    0.5f,1.0f,1.0f,1.0f,
+	              0.5f,1.0f,1.0f,1.0f,
 			                1.0f,0.5f,1.0f,1.0f,
 		                	1.0f,1.0f,0.5f,1.0f,
 			                1.0f,1.0f,1.0f,1.0f,
