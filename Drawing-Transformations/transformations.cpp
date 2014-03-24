@@ -2,9 +2,7 @@
 #include <cstdlib>
 using namespace std;
 
-void rotate(GLuint locate);
-
-GLuint vaoID,vboID[2];
+GLuint vaoID,vboID[2],eboID;
 GLuint program;
 
 GLfloat pit,yaw,scalar=1;
