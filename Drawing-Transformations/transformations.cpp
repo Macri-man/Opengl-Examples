@@ -82,7 +82,7 @@ void display(SDL_Window* screen){
   GLint tempLoc = glGetUniformLocation(program,"modelMatrix");
   glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
   
-  glDrawElements(GL_POLYGON,24,GL_UNSIGNED_BYTE,NULL);
+  glDrawElements(GL_QUADS,24,GL_UNSIGNED_BYTE,NULL);
   SDL_GL_SwapWindow(screen);
 }
 
