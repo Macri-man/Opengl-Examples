@@ -6,29 +6,45 @@
 #include "initShaders.h"
 using namespace std;
 int counter=0;
+int indexcounter=0;
 
 //vertexIDs
 GLuint vaoID, vboID;// the buffers that are going to be linked too
 //vertices
-GLfloat vertexarray[]={0.5f,-0.5f,0.0f,0.0f,0.5f,0.0f,-0.5f,-0.5f,0.0f};// vertices that are drawn x,y,z ...
-//indices of triangle
-GLubyte indices[3]={0,1,2};
+GLfloat trianglearray[]={ 0.5f,-0.5f,
+													0.0f,0.5f,
+													-0.5f,-0.5f};// vertices that are drawn x,y, ...
+				
+GLfloat squarearray[]={ 0.5f,-0.5f,
+                        0.5f,0.5f,
+                        -0.5f,0.5f,
+                        -0.5f,-0.5f};
 
-/*
-//opengl antique
-void triangle1(){
-	glClear(GL_COLOR_BUFFER_BIT);//clears the screen
-	glBegin(GL_TRIANGLES);//draws a triangle
-	glColor3f(1.0,1.0,0.0);//specifies the color r,g,b
-	glVertex3f(0.5,-0.5,0.0);
-	glVertex3f(0.0,0.5,0.0);
-	glVertex3f(-0.5,-0.5,0.0);
-	glEnd();
-	glFlush();
-}
-*/
-//opengl 4
-void triangle1(){
+GLfloat pentagonarray[]={ 0.0f,1.0f,
+                          0.5f,-0.5f,
+                          0.5f,0.5f,
+                          -0.5f,0.5f,
+                          -0.5f,-0.5f};
+
+GLfloat hexagonarray[]={ 0.5f,0.0f,
+                         0.25f,0.5f,
+                         -0.25f,-0.5f,
+                         -0.5f,0.0f,
+                         -0.25,-0.5f,
+                         0.25,0.5f
+                         };
+//indices of polygons
+typedef struct {
+  int offset;
+  GLubyte indices;
+} Polygonindices;
+
+GLubyte triangleindices[3]={0,1,2};
+GLubyte squareindices[4]={0,1,2,3};
+GLubyte pentagonindices[5]={0,1,2,3,4};
+GLubyte hexagonindices[6]={0,1,2,3,4,5};
+
+void init(){
   glClear(GL_COLOR_BUFFER_BIT);//clears the screen
   
   glGenVertexArrays(1, &vaoID);//generates object name for Vertex Array Objects
@@ -36,7 +52,12 @@ void triangle1(){
 
   glGenBuffers(1, &vboID);//generates object name for the Vertex Buffer Object
   glBindBuffer(GL_ARRAY_BUFFER, vboID);//bind the object to the array
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexarray), vertexarray, GL_STATIC_DRAW);//allocates the memory of the vertices
+  glBufferData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray)+sizeof(pentagonarray)+sizeof(hexagonarray), NULL, GL_STATIC_DRAW);//allocates the memory of the vertices
+  
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(trianglearray), trianglearray);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray), sizeof(squarearray), squarearray);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray), sizeof(pentagonarray), pentagonarray);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray)+sizeof(pentagonarray), sizeof(hexagonarray), hexagonarray);
 
  ShaderInfo shaders[]={//create the shader specified by my initshaders 
   { GL_VERTEX_SHADER , "vertexshader1.glsl"} ,
@@ -46,39 +67,12 @@ void triangle1(){
 
   initShaders(shaders);//creates shaders
   
-  glEnableVertexAttribArray(0);//enables the vertex attribute index 
-  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
-
-  glDrawArrays(GL_TRIANGLES, 0, 3);//draws array
-  glFlush();//makes sure the prcesses finish
-}
-
-void triangle2(){
-  glClear(GL_COLOR_BUFFER_BIT);//clear screen
-
-  glGenVertexArrays(1, &vaoID);//generates object name for Vertex Array Objects
-  glBindVertexArray(vaoID);//bind the object to the array
-
-  glGenBuffers(1, &vboID);//generates object name for the Vertex Buffer Object
-  glBindBuffer(GL_ARRAY_BUFFER, vboID);//bind the object to the array
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexarray), vertexarray, GL_STATIC_DRAW);//allocates the memory of the vertices
-
- ShaderInfo shaders[]={//create the shader specified by my initshaders input
-  { GL_VERTEX_SHADER , "vertexshader2.glsl"} ,
-  { GL_FRAGMENT_SHADER , "fragmentshader2.glsl"},
-  { GL_NONE , NULL} 
-  };
-
-  initShaders(shaders);//creates shaders
-  	  	
-  glEnableVertexAttribArray(0);//enables the vertex attribute index 
-  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
   
-  glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, indices);//draws object based on indices of the polygon
-  glDisableVertexAttribArray(0);
-  glFlush();//make sure the processes finish
+  
+  glEnableVertexAttribArray(0);//enables the vertex attribute index 
+  glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
 }
-
+/*
 void drawscene(){
   switch(counter%2){//easy way to switch throw functions
     case 0:
@@ -91,18 +85,22 @@ void drawscene(){
       break;
   }
 }
+*/
+void drawscene(Polygonindices* indices){
+  glClear(GL_COLOR_BUFFER_BIT);
+  glDrawElements(GL_POLYGON,3+(counter%3),GL_UNSIGNED_BYTE,);
+  glFlush();
+}
+
 //this function create the interaction with the mouse
 void mousepress(int button, int state, int x, int y){
   if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN)//right click closes the screen
     exit(0);
   else if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN){//left click changes the shape color
+    cout << 3+(counter%4) << endl;
     counter++;
     drawscene();
   }
-}
-
-void idle(void){
-  glutPostRedisplay();
 }
 
 int main(int argc, char **argv){
@@ -222,8 +220,16 @@ int main(int argc, char **argv){
 
   version=glGetString(GL_VERSION);
   fprintf(stderr,"Opengl version %s\n", version);
-
-  glutDisplayFunc(drawscene);//displays callback draws the shapes
+  
+  init();
+  Polygonindices indices[]={
+  {3,triangleindices[3]},
+  {4,squareindices[4]},
+  {5,pentagonindices[5]},
+  {6,hexagonindices[6]},
+  };
+  
+  glutDisplayFunc(drawscene(indices));//displays callback draws the shapes
   glutMouseFunc(mousepress);//control callback specifies the mouse controls
   glutMainLoop();//sets opengl state in a neverending loop
   return 0;
