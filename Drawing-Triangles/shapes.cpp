@@ -6,14 +6,15 @@
 #include "initShaders.h"
 using namespace std;
 int counter=0;
-int indexcounter=0;
+int offset=0;
+int size=0;
 
 //vertexIDs
-GLuint vaoID, vboID;// the buffers that are going to be linked too
+GLuint vaoID,vboID,eboID;;// the buffers that are going to be linked too
 //vertices
 GLfloat trianglearray[]={ 0.5f,-0.5f,
-													0.0f,0.5f,
-													-0.5f,-0.5f};// vertices that are drawn x,y, ...
+				0.0f,0.5f,
+				-0.5f,-0.5f};// vertices that are drawn x,y, ...
 				
 GLfloat squarearray[]={ 0.5f,-0.5f,
                         0.5f,0.5f,
@@ -33,16 +34,11 @@ GLfloat hexagonarray[]={ 0.5f,0.0f,
                          -0.25,-0.5f,
                          0.25,0.5f
                          };
-//indices of polygons
-typedef struct {
-  int offset;
-  GLubyte indices;
-} Polygonindices;
 
 GLubyte triangleindices[3]={0,1,2};
-GLubyte squareindices[4]={0,1,2,3};
-GLubyte pentagonindices[5]={0,1,2,3,4};
-GLubyte hexagonindices[6]={0,1,2,3,4,5};
+GLubyte squareindices[4]={0,1,2,0,3,2};
+GLubyte pentagonindices[5]={0,1,4,2,3,4,2,1,4};
+GLubyte hexagonindices[6]={1,5,0,1,4,5,1,3,4,1,2,3};
 
 void init(){
   glClear(GL_COLOR_BUFFER_BIT);//clears the screen
@@ -58,6 +54,17 @@ void init(){
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray), sizeof(squarearray), squarearray);
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray), sizeof(pentagonarray), pentagonarray);
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray)+sizeof(pentagonarray), sizeof(hexagonarray), hexagonarray);
+  
+  glGenBuffers(1,&eboID);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eboID);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices)+sizeof(pentagonindices)+sizeof(hexagonindices), NULL, GL_STATIC_DRAW);//allocates the memory of the indices
+  
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangleindices), triangleindices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices), sizeof(squareindices),squareindices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices), sizeof(pentagonindices), pentagonindices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices)+sizeof(pentagonindices), sizeof(hexagonindices), hexagonindices);
+  
+  
 
  ShaderInfo shaders[]={//create the shader specified by my initshaders 
   { GL_VERTEX_SHADER , "vertexshader1.glsl"} ,
@@ -66,8 +73,6 @@ void init(){
   };
 
   initShaders(shaders);//creates shaders
-  
-  
   
   glEnableVertexAttribArray(0);//enables the vertex attribute index 
   glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
@@ -86,9 +91,9 @@ void drawscene(){
   }
 }
 */
-void drawscene(Polygonindices* indices){
+void drawscene(){
   glClear(GL_COLOR_BUFFER_BIT);
-  glDrawElements(GL_POLYGON,3+(counter%3),GL_UNSIGNED_BYTE,);
+  glDrawArrays(GL_TRIANGLE_FAN,offset,size);
   glFlush();
 }
 
@@ -97,8 +102,16 @@ void mousepress(int button, int state, int x, int y){
   if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN)//right click closes the screen
     exit(0);
   else if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN){//left click changes the shape color
-    cout << 3+(counter%4) << endl;
+    size=3+(counter%5);
     counter++;
+    switch(size){
+    	case 3:offset=0;break;
+    	case 4:offset=3;break;
+    	case 5:offset=3+4;break;
+    	case 6:offset=3+4+5;break;
+    }
+    cout << "size: " << size << endl;
+    cout << "offset: " << offset << endl;
     drawscene();
   }
 }
@@ -222,14 +235,8 @@ int main(int argc, char **argv){
   fprintf(stderr,"Opengl version %s\n", version);
   
   init();
-  Polygonindices indices[]={
-  {3,triangleindices[3]},
-  {4,squareindices[4]},
-  {5,pentagonindices[5]},
-  {6,hexagonindices[6]},
-  };
   
-  glutDisplayFunc(drawscene(indices));//displays callback draws the shapes
+  glutDisplayFunc(drawscene);//displays callback draws the shapes
   glutMouseFunc(mousepress);//control callback specifies the mouse controls
   glutMainLoop();//sets opengl state in a neverending loop
   return 0;
