@@ -10,8 +10,8 @@
 
   all: $(TARGET)
 
-  $(TARGET): $(TARGET).cpp
-  	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
+  $(TARGET): $(TARGET).cpp initShader.h
+  	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
 
   clean:
   	$(RM) $(TARGET)
