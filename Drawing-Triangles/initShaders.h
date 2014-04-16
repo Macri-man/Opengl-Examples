@@ -1,9 +1,9 @@
 #ifndef INITSHADERS_H_
 #define INITSHADERS_H_
 
-//#include "SDL2/SDL.h"
+#include "SDL2/SDL.h"
 #include "GL/glew.h"
-#include "GL/freeglut.h"
+
 #include "GL/gl.h"
 #include "GL/glu.h"
 

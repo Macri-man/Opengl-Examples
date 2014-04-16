@@ -123,11 +123,13 @@ int main(int argc, char **argv){
   if(window==NULL){fprintf(stderr,"Unable to create window: %s\n",SDL_GetError());}
 	
   SDL_GLContext glcontext=SDL_GL_CreateContext(window);
+  
   glewExperimental=GL_TRUE;
   if(glewInit()){
     fprintf(stderr, "Unable to initalize GLEW");
     exit(EXIT_FAILURE);
   }
+  
   init();
   while(true){
     input(window);

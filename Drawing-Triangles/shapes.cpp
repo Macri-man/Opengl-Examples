@@ -8,6 +8,7 @@ using namespace std;
 int counter=0;
 int offset=0;
 int size=0;
+int type;
 
 //vertexIDs
 GLuint vaoID,vboID,eboID;;// the buffers that are going to be linked too
@@ -22,10 +23,10 @@ GLfloat squarearray[]={ 0.5f,-0.5f,
                         -0.5f,-0.5f};
 
 GLfloat pentagonarray[]={ 0.0f,1.0f,
-                          0.5f,-0.5f,
                           0.5f,0.5f,
-                          -0.5f,0.5f,
-                          -0.5f,-0.5f};
+                          0.5f,-0.5f,
+                          -0.5f,-0.5f,
+                          -0.5f,0.5f};
 
 GLfloat hexagonarray[]={ 0.5f,0.0f,
                          0.25f,0.5f,
@@ -34,11 +35,6 @@ GLfloat hexagonarray[]={ 0.5f,0.0f,
                          -0.25,-0.5f,
                          0.25,0.5f
                          };
-
-GLubyte triangleindices[3]={0,1,2};
-GLubyte squareindices[4]={0,1,2,0,3,2};
-GLubyte pentagonindices[5]={0,1,4,2,3,4,2,1,4};
-GLubyte hexagonindices[6]={1,5,0,1,4,5,1,3,4,1,2,3};
 
 void init(){
   glClear(GL_COLOR_BUFFER_BIT);//clears the screen
@@ -54,21 +50,10 @@ void init(){
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray), sizeof(squarearray), squarearray);
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray), sizeof(pentagonarray), pentagonarray);
   glBufferSubData(GL_ARRAY_BUFFER, sizeof(trianglearray)+sizeof(squarearray)+sizeof(pentagonarray), sizeof(hexagonarray), hexagonarray);
-  
-  glGenBuffers(1,&eboID);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eboID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices)+sizeof(pentagonindices)+sizeof(hexagonindices), NULL, GL_STATIC_DRAW);//allocates the memory of the indices
-  
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangleindices), triangleindices);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices), sizeof(squareindices),squareindices);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices), sizeof(pentagonindices), pentagonindices);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangleindices)+sizeof(squareindices)+sizeof(pentagonindices), sizeof(hexagonindices), hexagonindices);
-  
-  
 
  ShaderInfo shaders[]={//create the shader specified by my initshaders 
-  { GL_VERTEX_SHADER , "vertexshader1.glsl"} ,
-  { GL_FRAGMENT_SHADER , "fragmentshader1.glsl"},
+  { GL_VERTEX_SHADER , "vertexshader.glsl"} ,
+  { GL_FRAGMENT_SHADER , "fragmentshader.glsl"},
   { GL_NONE , NULL} 
   };
 
@@ -77,47 +62,44 @@ void init(){
   glEnableVertexAttribArray(0);//enables the vertex attribute index 
   glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
 }
-/*
-void drawscene(){
-  switch(counter%2){//easy way to switch throw functions
-    case 0:
-      glutDisplayFunc(triangle1);
-      glutPostRedisplay();//sets flags for opengl to redraw the display
-      break;
-    case 1:
-      glutDisplayFunc(triangle2);
-      glutPostRedisplay();
-      break;
-  }
-}
-*/
-void drawscene(){
+
+void drawscene(SDL_Window* screen,int type){
   glClear(GL_COLOR_BUFFER_BIT);
-  glDrawArrays(GL_TRIANGLE_FAN,offset,size);
-  glFlush();
+  cerr << " offset: " << offset << " size: " << size << " type: " << type << endl;
+  switch(size){
+    case 3: glDrawArrays(GL_TRIANGLES,offset,size);
+    case 4: glDrawArrays(GL_QUADS,offset,size);
+    case 5: glDrawArrays(GL_POLYGON,offset,size);
+    case 6: glDrawArrays(GL_POLYGON,offset,size);
+  }
+
+  SDL_GL_SwapWindow(screen);
 }
 
-//this function create the interaction with the mouse
-void mousepress(int button, int state, int x, int y){
-  if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN)//right click closes the screen
-    exit(0);
-  else if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN){//left click changes the shape color
-    size=3+(counter%5);
-    counter++;
-    switch(size){
-    	case 3:offset=0;break;
-    	case 4:offset=3;break;
-    	case 5:offset=3+4;break;
-    	case 6:offset=3+4+5;break;
-    }
-    cout << "size: " << size << endl;
-    cout << "offset: " << offset << endl;
-    drawscene();
-  }
+void input(SDL_Window* screen,int type){
+	SDL_Event event;
+	while(SDL_PollEvent(&event)){
+		switch(event.type){
+		  case SDL_QUIT:exit(0);break;
+      case SDL_MOUSEBUTTONUP:
+        switch(event.button.button){
+          case SDL_BUTTON_LEFT:
+            size=3+(counter%5);
+            counter++;
+            switch(size){
+    	      case 3:offset=0;break;
+    	      case 4:offset=3;break;
+    	      case 5:offset=3+4;break;
+    	      case 6:offset=3+4+5;break;
+            }
+            break;
+          case SDL_BUTTON_RIGHT:exit(0);break;
+        }
+		  }
+	  }
 }
 
 int main(int argc, char **argv){
-	/*
 	//SDL window and context management
 	SDL_Window *window;
 	
@@ -126,9 +108,6 @@ int main(int argc, char **argv){
     SDL_Quit();
     exit(1);//die on error
 	}
-	//get the version of opengl
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	
 	//create window
 	window = SDL_CreateWindow(
@@ -149,84 +128,12 @@ int main(int argc, char **argv){
 	SDL_GLContext glcontext=SDL_GL_CreateContext(window);
 	
 	
-	SDL_Event event;
-	while(SDL_PollEvent(&event)){
-		switch(event.type){
-			case SDL_BUTTON_RIGHT:exit(1);
-		}
-	}
-	while(1){
-		triangle1();
-		SDL_GL_SwapBuffers();
-	}
-	
-	SDL_GL_DeleteContext(glcontext);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
- 
-  return 0;
-}
-*/
-/*
-	//GLFW window and context managment
-	GLFWwindow* window;
-
-    // Initialize the library 
-    if(!glfwInit()){
-    		fprintf(stderr,"unable to intilize GLFW");
-        exit(EXIT_FAILURE);
-    }
-
-    // Create a windowed mode window and its OpenGL context 
-    window = glfwCreateWindow(
-    500, //width
-    500, //height
-    "Simple",//name
-    NULL, //moniter
-    NULL);//share
-    //check to see if window created
-    if (!window){
-  			fprintf(stderr,"unable to open window");
-        glfwTerminate();
-       exit(EXIT_FAILURE);
-    }
-
-    // Make the window's context current 
-    glfwMakeContextCurrent(window);
-
-    // Loop until the user closes the window 
-    while (!glfwWindowShouldClose(window)){
-
-        drawscene();
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){glfwSetWindowShouldClose(window, GL_TRUE);}
-	
-        // Swap front and back buffers 
-        glfwSwapBuffers(window);
-
-        // Poll for and process events 
-        glfwPollEvents();
-    }
-
-    glfwTerminate();
-    return 0;
-}
-*/
-
-	//Freeglut window and context management	
-  glutInit(&argc, argv);
-  glutCreateWindow("Shapes");//creates the window with the specified name
-  
-  //initializes glew
-  glewExperimental=GL_TRUE;
+	glewExperimental=GL_TRUE;
   if(glewInit()){
     fprintf(stderr, "Unable to initalize GLEW");
     exit(EXIT_FAILURE);
   }
   
-  glutInitContextVersion(4, 3);//specifies the version of opengl
-  glutInitContextProfile(GLUT_CORE_PROFILE|GLUT_COMPATIBILITY_PROFILE);//specifies what profile your using
-
-
   //retruns what version of opengl and glsl your computer can use
   const GLubyte* version=glGetString(GL_SHADING_LANGUAGE_VERSION);
   fprintf(stderr,"Opengl glsl version %s\n", version);
@@ -235,10 +142,19 @@ int main(int argc, char **argv){
   fprintf(stderr,"Opengl version %s\n", version);
   
   init();
-  
-  glutDisplayFunc(drawscene);//displays callback draws the shapes
-  glutMouseFunc(mousepress);//control callback specifies the mouse controls
-  glutMainLoop();//sets opengl state in a neverending loop
+	
+
+	while(1){
+		drawscene(window,type);
+		cerr << "typing: " << type << endl;
+		input(window,type);
+		//SDL_GL_SwapBuffers();
+	}
+	
+	SDL_GL_DeleteContext(glcontext);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+ 
   return 0;
 }
 
