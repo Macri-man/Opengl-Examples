@@ -1,17 +1,14 @@
-  CC = g++
+CC = g++
 
-  # compiler flags:
-  #  -g    adds debugging information to the executable file
-  #  -Wall turns on most, but not all, compiler warnings
-  CFLAGS  = -g -Wall -lglut -lGLEW -lGLU -lGL 
+CFLAGS = -g -Wall -lSDL2 -lGLEW -lGLU -lGL 
 
-  # the build target executable:
-  TARGET = shapes
+TARGET = shapes
 
-  all: $(TARGET)
+all: $(TARGET)
 
-  $(TARGET): $(TARGET).cpp initShader.h
-  	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
+$(TARGET): $(TARGET).cpp initShaders.h
+	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
 
-  clean:
-  	$(RM) $(TARGET)
+clean:
+	$(RM) $(TARGET)
+  

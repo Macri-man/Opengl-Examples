@@ -8,7 +8,6 @@ using namespace std;
 int counter=0;
 int offset=0;
 int size=0;
-int type;
 
 //vertexIDs
 GLuint vaoID,vboID,eboID;;// the buffers that are going to be linked too
@@ -28,12 +27,12 @@ GLfloat pentagonarray[]={ 0.0f,1.0f,
                           -0.5f,-0.5f,
                           -0.5f,0.5f};
 
-GLfloat hexagonarray[]={ 0.5f,0.0f,
+GLfloat hexagonarray[]={ -0.5f,0.0f,
+                         -0.25f,0.5f,
                          0.25f,0.5f,
-                         -0.25f,-0.5f,
-                         -0.5f,0.0f,
-                         -0.25,-0.5f,
-                         0.25,0.5f
+                         0.5f,0.0f,
+                         0.25,-0.5f,
+                         -0.25,-0.5f
                          };
 
 void init(){
@@ -63,20 +62,14 @@ void init(){
   glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,(void*)0);//specified the start the vertice array used to the draw
 }
 
-void drawscene(SDL_Window* screen,int type){
+void drawscene(SDL_Window* screen){
   glClear(GL_COLOR_BUFFER_BIT);
-  cerr << " offset: " << offset << " size: " << size << " type: " << type << endl;
-  switch(size){
-    case 3: glDrawArrays(GL_TRIANGLES,offset,size);
-    case 4: glDrawArrays(GL_QUADS,offset,size);
-    case 5: glDrawArrays(GL_POLYGON,offset,size);
-    case 6: glDrawArrays(GL_POLYGON,offset,size);
-  }
 
+  glDrawArrays(GL_POLYGON,offset,size);
   SDL_GL_SwapWindow(screen);
 }
 
-void input(SDL_Window* screen,int type){
+void input(SDL_Window* screen){
 	SDL_Event event;
 	while(SDL_PollEvent(&event)){
 		switch(event.type){
@@ -84,7 +77,7 @@ void input(SDL_Window* screen,int type){
       case SDL_MOUSEBUTTONUP:
         switch(event.button.button){
           case SDL_BUTTON_LEFT:
-            size=3+(counter%5);
+            size=3+(counter%4);
             counter++;
             switch(size){
     	      case 3:offset=0;break;
@@ -145,9 +138,8 @@ int main(int argc, char **argv){
 	
 
 	while(1){
-		drawscene(window,type);
-		cerr << "typing: " << type << endl;
-		input(window,type);
+		drawscene(window);
+		input(window);
 		//SDL_GL_SwapBuffers();
 	}
 	
